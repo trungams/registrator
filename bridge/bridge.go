@@ -198,6 +198,13 @@ func (b *Bridge) add(containerId string, quiet bool) {
 		return
 	}
 
+	_, ok := container.NetworkSettings.Networks[b.config.NetworkName]
+
+	if !ok {
+		log.Println("ignore container outside of this network:", containerId[:12])
+		return
+	}
+
 	ports := make(map[string]ServicePort)
 
 	// Extract configured host port mappings, relevant when using --net=host

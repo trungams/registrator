@@ -20,6 +20,7 @@ var Version string
 var versionChecker = usage.NewChecker("registrator", Version)
 
 var hostIp = flag.String("ip", "", "IP for ports mapped to the host")
+var networkName = flag.String("network", "", "Only register available containers within this Docker network")
 var internal = flag.Bool("internal", false, "Use internal ports instead of published ones")
 var explicit = flag.Bool("explicit", false, "Only register containers which have SERVICE_NAME label set")
 var useIpFromLabel = flag.String("useIpFromLabel", "", "Use IP which is stored in a label assigned to the container")
@@ -76,6 +77,10 @@ func main() {
 		log.Println("Forcing host IP to", *hostIp)
 	}
 
+	if *networkName != "" {
+		log.Println("Only listen to events within network", *networkName)
+	}
+
 	if (*refreshTtl == 0 && *refreshInterval > 0) || (*refreshTtl > 0 && *refreshInterval == 0) {
 		assert(errors.New("-ttl and -ttl-refresh must be specified together or not at all"))
 	} else if *refreshTtl > 0 && *refreshTtl <= *refreshInterval {
@@ -104,6 +109,7 @@ func main() {
 
 	b, err := bridge.New(docker, flag.Arg(0), bridge.Config{
 		HostIp:          *hostIp,
+		NetworkName:     *networkName,
 		Internal:        *internal,
 		Explicit:        *explicit,
 		UseIpFromLabel:  *useIpFromLabel,
